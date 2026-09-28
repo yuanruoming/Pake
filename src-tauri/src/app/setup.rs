@@ -7,7 +7,7 @@ use std::sync::{atomic::AtomicBool, Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
-    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
@@ -74,23 +74,14 @@ pub fn set_system_tray(
             }
             _ => (),
         })
-        .on_tray_icon_event(move |tray, event| {
-            if let TrayIconEvent::Click {
-                button,
-                button_state,
-                ..
-            } = event
-            {
-                // Windows emits Click twice per physical click (Down then Up).
-                // Reacting to both runs the toggle twice, so a hidden window is
-                // shown and immediately re-hidden and the tray looks dead (#1343).
-                if button == MouseButton::Left && button_state == MouseButtonState::Up {
-                    // Any tray toggle claims visibility control from startup reveal.
-                    cancel_startup_reveal(&click_revealed);
-                    toggle_all_app_windows(tray.app_handle(), _init_fullscreen);
-                }
+    .on_tray_icon_event(move |tray, event| {
+        if let TrayIconEvent::DoubleClick { button, .. } = event {
+            if button == MouseButton::Left {
+                cancel_startup_reveal(&click_revealed);
+                toggle_all_app_windows(tray.app_handle(), _init_fullscreen);
             }
-        });
+        }
+    });
 
     let resolved_icon = if tray_icon_path.is_empty() {
         app.default_window_icon().cloned()
