@@ -74,14 +74,14 @@ pub fn set_system_tray(
             }
             _ => (),
         })
-    .on_tray_icon_event(move |tray, event| {
-        if let TrayIconEvent::DoubleClick { button, .. } = event {
-            if button == MouseButton::Left {
-                cancel_startup_reveal(&click_revealed);
-                toggle_all_app_windows(tray.app_handle(), _init_fullscreen);
+        .on_tray_icon_event(move |tray, event| {
+            if let TrayIconEvent::DoubleClick { button, .. } = event {
+                if button == MouseButton::Left {
+                    cancel_startup_reveal(&click_revealed);
+                    toggle_all_app_windows(tray.app_handle(), _init_fullscreen);
+                }
             }
-        }
-    });
+        });
 
     let resolved_icon = if tray_icon_path.is_empty() {
         app.default_window_icon().cloned()
