@@ -58,6 +58,21 @@ on:
         required: false
         type: boolean
         default: false
+      show_system_tray:
+        description: "Show app in system tray"
+        required: false
+        type: boolean
+        default: true
+      hide_on_close:
+        description: "Hide window to tray when clicking close"
+        required: false
+        type: boolean
+        default: true
+      start_to_tray:
+        description: "Start app hidden in system tray"
+        required: false
+        type: boolean
+        default: false
       multi_arch:
         description: "Universal binary (macOS only)"
         required: false
@@ -207,6 +222,18 @@ jobs:
 
           if ("${{ inputs.new_window }}" -eq "true") {
             $args += "--new-window"
+          }
+          
+          if ("${{ inputs.show_system_tray }}" -eq "true") {
+            $args += "--show-system-tray"
+          }
+
+          if ("${{ inputs.hide_on_close }}" -eq "true") {
+            $args += "--hide-on-close"
+          }
+
+          if ("${{ inputs.start_to_tray }}" -eq "true") {
+            $args += "--start-to-tray"
           }
 
           Write-Host "Running: node dist/cli.js $($args -join ' ')"
