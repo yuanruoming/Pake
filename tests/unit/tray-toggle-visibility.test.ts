@@ -12,16 +12,15 @@ const windowSource = fs.readFileSync(
   'utf8',
 );
 
-describe('tray click toggle (#1343)', () => {
-  it('acts on one edge of the click, not both', () => {
-    // Windows emits TrayIconEvent::Click twice per physical click, Down then
-    // Up. Matching on button alone runs the toggle twice, so a hidden window is
-    // shown and immediately re-hidden.
+describe('tray double-click toggle', () => {
+  it('toggles the window on a left-button double click', () => {
     const handler = setupSource.slice(
       setupSource.indexOf('.on_tray_icon_event('),
     );
-    expect(handler).toContain('button_state');
-    expect(handler).toMatch(/button_state\s*==\s*MouseButtonState::Up/);
+
+    expect(handler).toContain('TrayIconEvent::DoubleClick');
+    expect(handler).toMatch(/button\s*==\s*MouseButton::Left/);
+    expect(handler).not.toContain('button_state');
   });
 
   it('treats a minimized window as not on screen', () => {
