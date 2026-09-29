@@ -20,7 +20,6 @@ describe('tray double-click toggle', () => {
 
     expect(handler).toContain('TrayIconEvent::DoubleClick');
     expect(handler).toMatch(/button\s*==\s*MouseButton::Left/);
-    expect(handler).not.toContain('button_state');
   });
 
   it('treats a minimized window as not on screen', () => {

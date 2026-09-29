@@ -1,24 +1,31 @@
-use crate::app::window::{
-    hide_all_app_windows, open_additional_window_safe, show_all_app_windows, toggle_all_app_windows,
-};
+use crate::app::window::toggle_all_app_windows;
 use crate::cancel_startup_reveal;
 use std::str::FromStr;
 use std::sync::{atomic::AtomicBool, Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
-    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
+const PREV_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("../icons/previous.png");
+
+const PLAY_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("../icons/play.png");
+
+const NEXT_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("../icons/next.png");
 
 pub fn set_system_tray(
     app: &AppHandle,
     show_system_tray: bool,
     tray_icon_path: &str,
     _init_fullscreen: bool,
-    allow_multi_window: bool,
+    _allow_multi_window: bool,
     startup_revealed: Arc<AtomicBool>,
 ) -> tauri::Result<()> {
     if !show_system_tray {
@@ -26,53 +33,28 @@ pub fn set_system_tray(
         return Ok(());
     }
 
-    // Menu events are broadcast to every handler in Tauri v2, so the tray item
-    // must not share the "new_window" id with the app menu accelerator
-    // (Cmd/Ctrl+N), or one click opens two windows.
-    let new_window = MenuItemBuilder::with_id("tray_new_window", "New Window").build(app)?;
-    let hide_app = MenuItemBuilder::with_id("hide_app", "Hide").build(app)?;
-    let show_app = MenuItemBuilder::with_id("show_app", "Show").build(app)?;
+    // Main YouTube Music tray menu: Quit only
     let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
-
-    let menu = if allow_multi_window {
-        MenuBuilder::new(app)
-            .items(&[&new_window, &hide_app, &show_app, &quit])
-            .build()?
-    } else {
-        MenuBuilder::new(app)
-            .items(&[&hide_app, &show_app, &quit])
-            .build()?
-    };
+    let menu = MenuBuilder::new(app).items(&[&quit]).build()?;
 
     app.app_handle().remove_tray_by_id("pake-tray");
 
-    let menu_revealed = startup_revealed.clone();
     let click_revealed = startup_revealed;
+
     let mut tray_builder = TrayIconBuilder::new()
         .menu(&menu)
-        .on_menu_event(move |app, event| match event.id().as_ref() {
-            "tray_new_window" => {
-                open_additional_window_safe(app);
-            }
-            "hide_app" => {
-                // Hide every webview (main + multi-window clones), not only "pake".
-                cancel_startup_reveal(&menu_revealed);
-                hide_all_app_windows(app);
-            }
-            "show_app" => {
-                cancel_startup_reveal(&menu_revealed);
-                show_all_app_windows(app, _init_fullscreen);
-            }
-            "quit" => {
+        .show_menu_on_left_click(false)
+        .on_menu_event(move |app, event| {
+            if event.id().as_ref() == "quit" {
                 let flags = if _init_fullscreen {
                     StateFlags::all()
                 } else {
                     StateFlags::all() & !StateFlags::FULLSCREEN
                 };
+
                 let _ = app.save_window_state(flags);
                 app.exit(0);
             }
-            _ => (),
         })
         .on_tray_icon_event(move |tray, event| {
             if let TrayIconEvent::DoubleClick { button, .. } = event {
@@ -98,8 +80,71 @@ pub fn set_system_tray(
     }
 
     let tray = tray_builder.build(app)?;
-
     tray.set_icon_as_template(false)?;
+
+    // Previous
+    TrayIconBuilder::with_id("ytm-previous")
+        .icon(PREV_ICON)
+        .tooltip("Previous")
+        .show_menu_on_left_click(false)
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                if let Some(window) = tray.app_handle().get_webview_window("pake") {
+                    let _ = window.eval(
+                        "document.querySelector('.previous-button')?.click();",
+                    );
+                }
+            }
+        })
+        .build(app)?;
+
+    // Play / Pause toggle
+    TrayIconBuilder::with_id("ytm-play-pause")
+        .icon(PLAY_ICON)
+        .tooltip("Play / Pause")
+        .show_menu_on_left_click(false)
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                if let Some(window) = tray.app_handle().get_webview_window("pake") {
+                    let _ = window.eval(
+                        "document.querySelector('.play-pause-button')?.click();",
+                    );
+                }
+            }
+        })
+        .build(app)?;
+
+    // Next
+    TrayIconBuilder::with_id("ytm-next")
+        .icon(NEXT_ICON)
+        .tooltip("Next")
+        .show_menu_on_left_click(false)
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                if let Some(window) = tray.app_handle().get_webview_window("pake") {
+                    let _ = window.eval(
+                        "document.querySelector('.next-button')?.click();",
+                    );
+                }
+            }
+        })
+        .build(app)?;
+
     Ok(())
 }
 
