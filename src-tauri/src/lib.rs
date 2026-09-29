@@ -59,12 +59,20 @@ pub(crate) fn cancel_startup_reveal(revealed: &AtomicBool) {
     revealed.store(true, Ordering::Release);
 }
 
-fn reveal_startup_window(window: WebviewWindow, init_fullscreen: bool, revealed: &Arc<AtomicBool>) {
+    fn reveal_startup_window(
+        window: WebviewWindow,
+        init_fullscreen: bool,
+        init_maximized: bool,
+        revealed: &Arc<AtomicBool>,
+    ) {
     if !claim_startup_reveal(revealed) {
         return;
     }
 
     tauri::async_runtime::spawn(async move {
+        if init_maximized {
+            let _ = window.maximize();
+        }
         let _ = window.show();
         reapply_window_icon(&window);
 
@@ -297,6 +305,7 @@ pub fn run_app() {
         pake_config.windows[0].url_type == "web" && !pake_config.windows[0].incognito;
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
+    let init_maximized = pake_config.windows[0].maximize;
     let start_to_tray = pake_config.windows[0].start_to_tray && show_system_tray; // Only valid when tray is enabled
     let multi_instance = pake_config.multi_instance;
     let multi_window = pake_config.multi_window;
@@ -306,11 +315,15 @@ pub fn run_app() {
     let window_state_plugin = WindowStatePlugin::default()
         .with_state_flags(if init_fullscreen {
             StateFlags::FULLSCREEN
+        } else if init_maximized {
+            StateFlags::all()
+                & !StateFlags::VISIBLE
+                & !StateFlags::FULLSCREEN
+                & !StateFlags::MAXIMIZED
         } else {
-            // Prevent flickering on the first open.
-            // Exclude FULLSCREEN so a prior --fullscreen build's persisted state
-            // doesn't force fullscreen on a rebuild without --fullscreen.
-            StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::FULLSCREEN
+            StateFlags::all()
+                & !StateFlags::VISIBLE
+                & !StateFlags::FULLSCREEN
         })
         .build();
 
@@ -364,7 +377,7 @@ pub fn run_app() {
                     return;
                 }
                 if let Some(window) = webview.app_handle().get_webview_window("pake") {
-                    reveal_startup_window(window, init_fullscreen, &page_load_revealed);
+                    reveal_startup_window(window,init_fullscreen,init_maximized,&page_load_revealed,);
                 }
                 return;
             }
@@ -440,7 +453,12 @@ pub fn run_app() {
                         STARTUP_WINDOW_FALLBACK_DELAY,
                     ))
                     .await;
-                    reveal_startup_window(window_clone, init_fullscreen, &startup_window_revealed);
+                    reveal_startup_window(
+    window_clone,
+    init_fullscreen,
+    init_maximized,
+    &startup_window_revealed,
+);
                 });
             } else {
                 // Tray/shortcut already hold clones that cancel user-driven toggles.

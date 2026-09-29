@@ -502,7 +502,6 @@ fn build_window(
         .visible(visible)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
-        .maximized(window_config.maximize);
 
     #[cfg(target_os = "windows")]
     {
