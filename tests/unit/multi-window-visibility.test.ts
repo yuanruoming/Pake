@@ -44,6 +44,7 @@ it('routes tray double-click and activation shortcut through multi-window toggle
   expect(setupSource).not.toContain('"show_app"');
 });     
 
+});
 describe('native webview navigation IPC', () => {
   it('registers webview_navigate for reload/back/forward', () => {
     expect(invokeSource).toContain('pub fn webview_navigate');
