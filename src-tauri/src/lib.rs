@@ -59,12 +59,12 @@ pub(crate) fn cancel_startup_reveal(revealed: &AtomicBool) {
     revealed.store(true, Ordering::Release);
 }
 
-    fn reveal_startup_window(
-        window: WebviewWindow,
-        init_fullscreen: bool,
-        init_maximized: bool,
-        revealed: &Arc<AtomicBool>,
-    ) {
+fn reveal_startup_window(
+    window: WebviewWindow,
+    init_fullscreen: bool,
+    init_maximized: bool,
+    revealed: &Arc<AtomicBool>,
+) {
     if !claim_startup_reveal(revealed) {
         return;
     }
@@ -321,9 +321,7 @@ pub fn run_app() {
                 & !StateFlags::FULLSCREEN
                 & !StateFlags::MAXIMIZED
         } else {
-            StateFlags::all()
-                & !StateFlags::VISIBLE
-                & !StateFlags::FULLSCREEN
+            StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::FULLSCREEN
         })
         .build();
 
@@ -377,7 +375,12 @@ pub fn run_app() {
                     return;
                 }
                 if let Some(window) = webview.app_handle().get_webview_window("pake") {
-                    reveal_startup_window(window,init_fullscreen,init_maximized,&page_load_revealed,);
+                    reveal_startup_window(
+                        window,
+                        init_fullscreen,
+                        init_maximized,
+                        &page_load_revealed,
+                    );
                 }
                 return;
             }
@@ -454,11 +457,11 @@ pub fn run_app() {
                     ))
                     .await;
                     reveal_startup_window(
-    window_clone,
-    init_fullscreen,
-    init_maximized,
-    &startup_window_revealed,
-);
+                        window_clone,
+                        init_fullscreen,
+                        init_maximized,
+                        &startup_window_revealed,
+                    );
                 });
             } else {
                 // Tray/shortcut already hold clones that cancel user-driven toggles.
