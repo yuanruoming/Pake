@@ -38,7 +38,7 @@ pub fn set_system_tray(
 
     let click_revealed = startup_revealed;
 
-    let mut tray_builder = TrayIconBuilder::new()
+    let tray_builder = TrayIconBuilder::new()
         .icon(MAIN_TRAY_ICON)
         .tooltip("YouTube Music")
         .menu(&menu)
