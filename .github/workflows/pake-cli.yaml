@@ -48,6 +48,11 @@ on:
         required: false
         type: boolean
         default: false
+      maximize:
+        description: "Start maximized window"
+        required: false
+        type: boolean
+        default: false
       hide_title_bar:
         description: "Hide title bar (macOS only)"
         required: false
@@ -214,6 +219,10 @@ jobs:
 
           if ("${{ inputs.fullscreen }}" -eq "true") {
             $args += "--fullscreen"
+          }
+          
+          if ("${{ inputs.maximize }}" -eq "true") {
+            $args += "--maximize"
           }
 
           if ("${{ inputs.hide_title_bar }}" -eq "true") {

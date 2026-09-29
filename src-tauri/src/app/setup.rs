@@ -11,13 +11,16 @@ use tauri::{
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
+const MAIN_TRAY_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("./src/app/icons/ytm/ytm-tray-64.png");
+
 const PLAY_PAUSE_ICON: tauri::image::Image<'_> =
-    tauri::include_image!("./src/app/icons/ytm/playpause.png");
+    tauri::include_image!("./src/app/icons/ytm/playpause-tray-64.png");
 
 pub fn set_system_tray(
     app: &AppHandle,
     show_system_tray: bool,
-    tray_icon_path: &str,
+    _tray_icon_path: &str,
     _init_fullscreen: bool,
     _allow_multi_window: bool,
     startup_revealed: Arc<AtomicBool>,
@@ -36,6 +39,8 @@ pub fn set_system_tray(
     let click_revealed = startup_revealed;
 
     let mut tray_builder = TrayIconBuilder::new()
+        .icon(MAIN_TRAY_ICON)
+        .tooltip("YouTube Music")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| {
@@ -58,20 +63,6 @@ pub fn set_system_tray(
                 }
             }
         });
-
-    let resolved_icon = if tray_icon_path.is_empty() {
-        app.default_window_icon().cloned()
-    } else {
-        tauri::image::Image::from_path(tray_icon_path)
-            .ok()
-            .or_else(|| app.default_window_icon().cloned())
-    };
-
-    if let Some(icon) = resolved_icon {
-        tray_builder = tray_builder.icon(icon);
-    } else {
-        eprintln!("[Pake] No tray icon available; tray will build without an icon.");
-    }
 
     let tray = tray_builder.build(app)?;
     tray.set_icon_as_template(false)?;
