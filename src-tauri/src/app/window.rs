@@ -24,9 +24,7 @@ use tauri::{
 #[cfg(target_os = "windows")]
 use windows_sys::Win32::UI::{
     Shell::ExtractIconExW,
-    WindowsAndMessaging::{
-        ShowWindow, SendMessageW, ICON_BIG, SW_SHOWMAXIMIZED, WM_SETICON,
-    },
+    WindowsAndMessaging::{SendMessageW, ShowWindow, ICON_BIG, SW_SHOWMAXIMIZED, WM_SETICON},
 };
 
 use tauri::Theme;
