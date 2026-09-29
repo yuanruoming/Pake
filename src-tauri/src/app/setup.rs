@@ -88,9 +88,7 @@ pub fn set_system_tray(
             } = event
             {
                 if let Some(window) = tray.app_handle().get_webview_window("pake") {
-                    let _ = window.eval(
-                        "document.querySelector('.play-pause-button')?.click();"
-                    );
+                    let _ = window.eval("document.querySelector('.play-pause-button')?.click();");
                 }
             }
         })
