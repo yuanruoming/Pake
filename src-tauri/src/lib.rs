@@ -71,7 +71,6 @@ fn reveal_startup_window(
 
     tauri::async_runtime::spawn(async move {
         show_startup_window(&window, init_maximized);
-        reapply_window_icon(&window);
 
         // Fixed: Linux fullscreen issue with virtual keyboard
         #[cfg(target_os = "linux")]

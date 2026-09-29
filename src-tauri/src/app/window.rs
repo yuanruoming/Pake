@@ -204,6 +204,8 @@ pub fn show_startup_window(window: &WebviewWindow, maximized: bool) {
                 unsafe {
                     ShowWindow(hwnd.0, SW_SHOWMAXIMIZED);
                 }
+
+                reapply_window_icon(window);
                 return;
             }
         }
@@ -214,6 +216,7 @@ pub fn show_startup_window(window: &WebviewWindow, maximized: bool) {
     }
 
     let _ = window.show();
+    reapply_window_icon(window);
 }
 
 #[cfg(not(target_os = "windows"))]
