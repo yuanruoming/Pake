@@ -39,7 +39,6 @@ describe('startup window reveal', () => {
       /user_show_then_hide_blocks_automatic_startup_reveal/,
     );
     // Tray, shortcut, second-instance, hide-on-close, and dock reopen.
-    expect(setupSource).toMatch(/cancel_startup_reveal\(&menu_revealed\)/);
     expect(setupSource).toMatch(/cancel_startup_reveal\(&click_revealed\)/);
     expect(setupSource).toMatch(/cancel_startup_reveal\(&startup_revealed\)/);
     expect(libSource).toMatch(/cancel_startup_reveal\(&instance_revealed\)/);

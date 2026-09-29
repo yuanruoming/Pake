@@ -11,11 +11,14 @@ use tauri::{
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-const PREV_ICON: tauri::image::Image<'_> = tauri::include_image!("../icons/previous.png");
+const PREV_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("./icons/ytm/previous.png");
 
-const PLAY_ICON: tauri::image::Image<'_> = tauri::include_image!("../icons/play.png");
+const PLAY_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("./icons/ytm/play.png");
 
-const NEXT_ICON: tauri::image::Image<'_> = tauri::include_image!("../icons/next.png");
+const NEXT_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("./icons/ytm/next.png");
 
 pub fn set_system_tray(
     app: &AppHandle,

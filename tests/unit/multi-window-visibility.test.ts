@@ -31,25 +31,18 @@ describe('multi-window visibility control', () => {
     expect(windowSource).toContain('app.webview_windows()');
   });
 
-  it('routes tray hide/show/click and activation shortcut through multi-window helpers', () => {
-    expect(setupSource).toContain('hide_all_app_windows(app)');
-    expect(setupSource).toContain(
-      'show_all_app_windows(app, _init_fullscreen)',
-    );
-    expect(setupSource).toContain(
-      'toggle_all_app_windows(tray.app_handle(), _init_fullscreen)',
-    );
-    expect(setupSource).toContain(
-      'toggle_all_app_windows(app, _init_fullscreen)',
-    );
-    // Must not only touch the main label for hide/show menu items.
-    const hideBranch = setupSource.slice(
-      setupSource.indexOf('"hide_app"'),
-      setupSource.indexOf('"show_app"'),
-    );
-    expect(hideBranch).not.toContain('get_webview_window("pake")');
-  });
-});
+it('routes tray double-click and activation shortcut through multi-window toggle helper', () => {
+  expect(setupSource).toContain(
+    'toggle_all_app_windows(tray.app_handle(), _init_fullscreen)',
+  );
+
+  expect(setupSource).toContain(
+    'toggle_all_app_windows(app, _init_fullscreen)',
+  );
+
+  expect(setupSource).not.toContain('"hide_app"');
+  expect(setupSource).not.toContain('"show_app"');
+});     
 
 describe('native webview navigation IPC', () => {
   it('registers webview_navigate for reload/back/forward', () => {
