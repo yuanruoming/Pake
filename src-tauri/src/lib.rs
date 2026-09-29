@@ -35,7 +35,7 @@ use app::{
     setup::{set_global_shortcut, set_system_tray},
     window::{
         open_additional_window_safe, reapply_window_icon, reveal_built_window, save_last_url,
-        set_window, MultiWindowState,
+        set_window, show_startup_window, MultiWindowState,
     },
 };
 use util::get_pake_config;
@@ -70,10 +70,7 @@ fn reveal_startup_window(
     }
 
     tauri::async_runtime::spawn(async move {
-        if init_maximized {
-            let _ = window.maximize();
-        }
-        let _ = window.show();
+        show_startup_window(&window, init_maximized);
         reapply_window_icon(&window);
 
         // Fixed: Linux fullscreen issue with virtual keyboard

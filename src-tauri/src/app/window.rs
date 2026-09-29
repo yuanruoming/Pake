@@ -24,7 +24,9 @@ use tauri::{
 #[cfg(target_os = "windows")]
 use windows_sys::Win32::UI::{
     Shell::ExtractIconExW,
-    WindowsAndMessaging::{SendMessageW, ICON_BIG, WM_SETICON},
+    WindowsAndMessaging::{
+        ShowWindow, SendMessageW, ICON_BIG, SW_SHOWMAXIMIZED, WM_SETICON,
+    },
 };
 
 use tauri::Theme;
@@ -194,6 +196,26 @@ pub fn reapply_window_icon(window: &WebviewWindow) {
             eprintln!("[Pake] Failed to resolve the window handle for its taskbar icon: {error}");
         }
     }
+}
+
+pub fn show_startup_window(window: &WebviewWindow, maximized: bool) {
+    #[cfg(target_os = "windows")]
+    {
+        if maximized {
+            if let Ok(hwnd) = window.hwnd() {
+                unsafe {
+                    ShowWindow(hwnd.0, SW_SHOWMAXIMIZED);
+                }
+                return;
+            }
+        }
+    }
+
+    if maximized {
+        let _ = window.maximize();
+    }
+
+    let _ = window.show();
 }
 
 #[cfg(not(target_os = "windows"))]
