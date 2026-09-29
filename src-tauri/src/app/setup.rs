@@ -11,7 +11,8 @@ use tauri::{
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-const PLAY_PAUSE_ICON: tauri::image::Image<'_> = tauri::include_image!("./src/app/icons/ytm/playpause.png");
+const PLAY_PAUSE_ICON: tauri::image::Image<'_> =
+    tauri::include_image!("./src/app/icons/ytm/playpause.png");
 
 pub fn set_system_tray(
     app: &AppHandle,
