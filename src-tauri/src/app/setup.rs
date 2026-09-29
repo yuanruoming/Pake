@@ -11,11 +11,7 @@ use tauri::{
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-const PREV_ICON: tauri::image::Image<'_> = tauri::include_image!("./icons/ytm/previous.png");
-
-const PLAY_ICON: tauri::image::Image<'_> = tauri::include_image!("./icons/ytm/play.png");
-
-const NEXT_ICON: tauri::image::Image<'_> = tauri::include_image!("./icons/ytm/next.png");
+const PLAY_PAUSE_ICON: tauri::image::Image<'_> = tauri::include_image!("./icons/ytm/playpause.png");
 
 pub fn set_system_tray(
     app: &AppHandle,
@@ -79,28 +75,9 @@ pub fn set_system_tray(
     let tray = tray_builder.build(app)?;
     tray.set_icon_as_template(false)?;
 
-    // Previous
-    TrayIconBuilder::with_id("ytm-previous")
-        .icon(PREV_ICON)
-        .tooltip("Previous")
-        .show_menu_on_left_click(false)
-        .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                if let Some(window) = tray.app_handle().get_webview_window("pake") {
-                    let _ = window.eval("document.querySelector('.previous-button')?.click();");
-                }
-            }
-        })
-        .build(app)?;
-
-    // Play / Pause toggle
+    // Play / Pause
     TrayIconBuilder::with_id("ytm-play-pause")
-        .icon(PLAY_ICON)
+        .icon(PLAY_PAUSE_ICON)
         .tooltip("Play / Pause")
         .show_menu_on_left_click(false)
         .on_tray_icon_event(|tray, event| {
@@ -111,26 +88,9 @@ pub fn set_system_tray(
             } = event
             {
                 if let Some(window) = tray.app_handle().get_webview_window("pake") {
-                    let _ = window.eval("document.querySelector('.play-pause-button')?.click();");
-                }
-            }
-        })
-        .build(app)?;
-
-    // Next
-    TrayIconBuilder::with_id("ytm-next")
-        .icon(NEXT_ICON)
-        .tooltip("Next")
-        .show_menu_on_left_click(false)
-        .on_tray_icon_event(|tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {
-                if let Some(window) = tray.app_handle().get_webview_window("pake") {
-                    let _ = window.eval("document.querySelector('.next-button')?.click();");
+                    let _ = window.eval(
+                        "document.querySelector('.play-pause-button')?.click();"
+                    );
                 }
             }
         })

@@ -340,6 +340,11 @@ jobs:
             $args += "--icon", "src-tauri\png\${{ inputs.name }}_256.ico"
           }
 
+          # Use a small tray-optimized icon for YouTube Music
+          if ("${{ inputs.name }}" -eq "youtubemusic" -and (Test-Path "src-tauri\src\app\icons\ytm\ytm-tray.png")) {
+              $args += "--system-tray-icon", "src-tauri\src\app\icons\ytm\ytm-tray.png"
+          }
+
           if ("${{ inputs.new_window }}" -eq "true") {
             $args += "--new-window"
           }
